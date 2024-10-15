@@ -32,9 +32,9 @@ jobs:
       - checkout
       - docker/check
       - docker/build:
-          image: <<INSERT USERNAME>>/<<INSERT REPO>>
+          image: ttanttanyj/6m-software-m4-node-app-for-devops
       - docker/push:
-          image: <<INSERT USERNAME>>/<<INSERT REPO>>
+          image: ttanttanyj/6m-software-m4-node-app-for-devops
 
 workflows:
   simple_workflow:
