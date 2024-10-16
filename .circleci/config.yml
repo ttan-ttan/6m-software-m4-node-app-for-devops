@@ -57,13 +57,38 @@ jobs:
 workflows:
   simple_workflow:
     jobs:
-      - build
+      # Run build and test on main
+      - build:
+          filters:
+            branches:
+              only: main
       - test:
           requires:
             - build
-      - build-and-push:
+          filters:
+            branches:
+              only: main
+
+      # Run all jobs (build, test, publish, deploy) on release
+      - build:
+          filters:
+            branches:
+              only: release
+      - test:
+          requires:
+            - build
+          filters:
+            branches:
+              only: release
+      - publish:
           requires:
             - test
+          filters:
+            branches:
+              only: release
       - deploy:
           requires:
-            - build-and-push
+            - publish
+          filters:
+            branches:
+              only: release
