@@ -32,9 +32,9 @@ jobs:
       - setup_remote_docker
       - checkout
       - run:
-        name: Docker Login
-        command: |
-          echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+          name: Docker Login
+          command: |
+            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
       - docker/build:
           image: education-space/6m-software-m4-node-app-for-devops
       - docker/push:
