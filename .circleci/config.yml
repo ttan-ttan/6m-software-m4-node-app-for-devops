@@ -25,16 +25,19 @@ jobs:
       - run: |
           echo "Running tests..."
           npm run test
-  publish:
-    executor: docker/docker
+  build-and-push:
+    docker:
+      - image: cimg/node:16.10
     steps:
       - setup_remote_docker
       - checkout
-      - docker/check
+      - docker/login:
+          username: $DOCKER_USERNAME
+          password: $DOCKER_PASSWORD
       - docker/build:
-          image: ttanttanyj/6m-software-m4-node-app-for-devops
+          image: education-space/6m-software-m4-node-app-for-devops
       - docker/push:
-          image: ttanttanyj/6m-software-m4-node-app-for-devops
+          image: education-space/6m-software-m4-node-app-for-devops
 
 workflows:
   simple_workflow:
@@ -43,6 +46,6 @@ workflows:
       - test:
           requires:
             - build
-      - publish:
+      - build-and-push:
           requires:
             - test
