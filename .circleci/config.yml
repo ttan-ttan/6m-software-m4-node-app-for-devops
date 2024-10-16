@@ -31,7 +31,7 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
-      -run:
+      - run:
         name: Docker Login
         command: |
           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
