@@ -36,9 +36,9 @@ jobs:
           command: |
             echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
       - docker/build:
-          image: education-space/6m-software-m4-node-app-for-devops
+          image: ttanttanyj/6m-software-m4-node-app-for-devops
       - docker/push:
-          image: education-space/6m-software-m4-node-app-for-devops
+          image: ttanttanyj/6m-software-m4-node-app-for-devops
 
 workflows:
   simple_workflow:
