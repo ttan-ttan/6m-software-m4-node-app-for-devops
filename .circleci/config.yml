@@ -6,40 +6,40 @@ orbs:
   heroku: circleci/heroku@2.0
 
 jobs:
-  # build:
-  #   docker:
-  #     - image: cimg/node:16.10
-  #   steps:
-  #     - checkout
-  #     - node/install-packages:
-  #         pkg-manager: npm
-  #     - run: |
-  #         echo "Installing dependencies..."
-  #         npm install
-  # test:
-  #   docker:
-  #     - image: cimg/node:16.10
-  #   steps:
-  #     - checkout
-  #     - node/install-packages:
-  #         pkg-manager: npm
-  #     - run: |
-  #         echo "Running tests..."
-  #         npm run test
-  # build-and-push:
-  #   docker:
-  #     - image: cimg/node:16.10
-  #   steps:
-  #     - setup_remote_docker
-  #     - checkout
-  #     - run:
-  #         name: Docker Login
-  #         command: |
-  #           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-  #     - docker/build:
-  #         image: ttanttanyj/6m-software-m4-node-app-for-devops
-  #     - docker/push:
-  #         image: ttanttanyj/6m-software-m4-node-app-for-devops
+  build:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run: |
+          echo "Installing dependencies..."
+          npm install
+  test:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run: |
+          echo "Running tests..."
+          npm run test
+  build-and-push:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          name: Docker Login
+          command: |
+            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+      - docker/build:
+          image: ttanttanyj/6m-software-m4-node-app-for-devops
+      - docker/push:
+          image: ttanttanyj/6m-software-m4-node-app-for-devops
   deploy:
     executor: heroku/default
     steps:
@@ -57,11 +57,13 @@ jobs:
 workflows:
   simple_workflow:
     jobs:
-      # - build
-      # - test:
-      #     requires:
-      #       - build
-      # - build-and-push:
-      #     requires:
-      #       - test
-      - deploy
+      - build
+      - test:
+          requires:
+            - build
+      - build-and-push:
+          requires:
+            - test
+      - deploy:
+        requires:
+          - build-and-push
