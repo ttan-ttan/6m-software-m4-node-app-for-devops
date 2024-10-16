@@ -80,7 +80,7 @@ workflows:
           filters:
             branches:
               only: release
-      - publish:
+      - build-and-push:
           requires:
             - test
           filters:
@@ -88,7 +88,7 @@ workflows:
               only: release
       - deploy:
           requires:
-            - publish
+            - build-and-push
           filters:
             branches:
               only: release
