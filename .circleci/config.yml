@@ -54,41 +54,75 @@ jobs:
             heroku container:push web -a ttanttanyj-su-devops
             heroku container:release web -a ttanttanyj-su-devops
 
+#for project that use semantic versioning
 workflows:
   simple_workflow:
     jobs:
-      # Run build and test on main
       - build:
           filters:
             branches:
               only: main
       - test:
           requires:
-            - build
+            - build 
           filters:
             branches:
-              only: main
-
-      # Run all jobs (build, test, publish, deploy) on release
-      - build:
+              only: main     
+      - build-and-push:  
           filters:
-            branches:
-              only: release
-      - test:
-          requires:
-            - build
-          filters:
-            branches:
-              only: release
-      - build-and-push:
-          requires:
-            - test
-          filters:
-            branches:
-              only: release
+            tags:
+              only: /^v.*/  # triggered only when a tag following the pattern v* (e.g., v1.0.0) is pushed
+            branches: 
+              ignore: /.*/  # ignore any branch updates -this job would not run if got any branch update, except got the versioning tag above
       - deploy:
           requires:
             - build-and-push
           filters:
-            branches:
-              only: release
+            tags:
+              only: /^v.*/
+            branches: 
+              ignore: /.*/
+
+# branch-based method - for simplier project that is branch-centric
+# workflows:
+#   simple_workflow:
+#     jobs:
+#       # Run build and test on main branch
+#       - build:
+#           name: build-main  # Explicit name for main branch to avoid conflict
+#           filters:
+#             branches:
+#               only: main
+#       - test:
+#           name: test-main  # Explicit name for test on main to avoid conflict
+#           requires:
+#             - build-main  # Use the explicit name here
+#           filters:
+#             branches:
+#               only: main
+
+#       # Run all jobs (build, test, publish, deploy) on release branch
+#       - build:
+#           name: build-release  # Explicit name for release branch to avoid conflict
+#           filters:
+#             branches:
+#               only: release
+#       - test:
+#           name: test-release  # Explicit name for test on release to avoid conflict
+#           requires:
+#             - build-release
+#           filters:
+#             branches:
+#               only: release
+#       - publish:
+#           requires:
+#             - test-release
+#           filters:
+#             branches:
+#               only: release
+#       - deploy:
+#           requires:
+#             - publish
+#           filters:
+#             branches:
+#               only: release
