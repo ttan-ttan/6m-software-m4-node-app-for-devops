@@ -3,50 +3,65 @@ version: 2.1
 orbs:
   node: circleci/node@5.0.1
   docker: circleci/docker@2.1.4
+  heroku: circleci/heroku@2.0
 
 jobs:
-  build:
-    docker:
-      - image: cimg/node:16.10
+  # build:
+  #   docker:
+  #     - image: cimg/node:16.10
+  #   steps:
+  #     - checkout
+  #     - node/install-packages:
+  #         pkg-manager: npm
+  #     - run: |
+  #         echo "Installing dependencies..."
+  #         npm install
+  # test:
+  #   docker:
+  #     - image: cimg/node:16.10
+  #   steps:
+  #     - checkout
+  #     - node/install-packages:
+  #         pkg-manager: npm
+  #     - run: |
+  #         echo "Running tests..."
+  #         npm run test
+  # build-and-push:
+  #   docker:
+  #     - image: cimg/node:16.10
+  #   steps:
+  #     - setup_remote_docker
+  #     - checkout
+  #     - run:
+  #         name: Docker Login
+  #         command: |
+  #           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+  #     - docker/build:
+  #         image: ttanttanyj/6m-software-m4-node-app-for-devops
+  #     - docker/push:
+  #         image: ttanttanyj/6m-software-m4-node-app-for-devops
+  deploy:
+    executor: heroku/default
     steps:
-      - checkout
-      - node/install-packages:
-          pkg-manager: npm
-      - run: |
-          echo "Installing dependencies..."
-          npm install
-  test:
-    docker:
-      - image: cimg/node:16.10
-    steps:
-      - checkout
-      - node/install-packages:
-          pkg-manager: npm
-      - run: |
-          echo "Running tests..."
-          npm run test
-  build-and-push:
-    docker:
-      - image: cimg/node:16.10
-    steps:
-      - setup_remote_docker
-      - checkout
-      - run:
-          name: Docker Login
-          command: |
-            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-      - docker/build:
-          image: ttanttanyj/6m-software-m4-node-app-for-devops
-      - docker/push:
-          image: ttanttanyj/6m-software-m4-node-app-for-devops
+    - setup_remote_docker      
+    - heroku/install
+    - checkout
+    - run:
+        name: Heroku Container Push
+        command: | 
+            heroku container:login
+            heroku stack:set container -a ttanttanyj-su-devops
+            heroku container:push web -a ttanttanyj-su-devops
+            heroku container:release web -a ttanttanyj-su-devops
 
 workflows:
   simple_workflow:
     jobs:
-      - build
-      - test:
-          requires:
-            - build
-      - build-and-push:
-          requires:
-            - test
+      # - build
+      # - test:
+      #     requires:
+      #       - build
+      # - build-and-push:
+      #     requires:
+      #       - test
+      -deploy
