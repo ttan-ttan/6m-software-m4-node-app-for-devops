@@ -36,9 +36,7 @@ jobs:
       - run:
           name: Docker Login
           command: |
-            # echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-            echo "Docker Username: $DOCKER_USERNAME"
-            echo "Docker Password: $DOCKER_PASSWORD"
+            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
       - docker/build:
           image: ttanttanyj/6m-software-m4-node-app-for-devops
       - docker/push:
