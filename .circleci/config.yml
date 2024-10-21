@@ -72,7 +72,7 @@ jobs:
     docker:
       - image: cimg/node:16.10
     environment:
-      IMAGE_NAME: ttanyjttanyj/6m-software-m4-node-app-for-devops
+      IMAGE_NAME: ttanttanyj/6m-software-m4-node-app-for-devops
     steps:
       - checkout
       - setup_remote_docker
