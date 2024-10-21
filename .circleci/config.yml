@@ -27,20 +27,20 @@ jobs:
       - run: |
           echo "Running tests..."
           npm run test
-  # build-and-push:
-  #   docker:
-  #     - image: cimg/node:16.10
-  #   steps:
-  #     - setup_remote_docker
-  #     - checkout
-  #     - run:
-  #         name: Docker Login
-  #         command: |
-  #           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-  #     - docker/build:
-  #         image: ttanttanyj/6m-software-m4-node-app-for-devops
-  #     - docker/push:
-  #         image: ttanttanyj/6m-software-m4-node-app-for-devops
+  build-and-push:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          name: Docker Login
+          command: |
+            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+      - docker/build:
+          image: ttanttanyj/6m-software-m4-node-app-for-devops
+      - docker/push:
+          image: ttanttanyj/6m-software-m4-node-app-for-devops
   # deploy:
   #   executor: heroku/default
   #   steps:
@@ -94,6 +94,12 @@ workflows:
           filters:
             branches:
               only: main
+      - build-and-push:  
+          filters:
+            tags:
+              only: /^v.*/  # triggered only when a tag following the pattern v* (e.g., v1.0.0) is pushed
+            branches: 
+              ignore: /.*/  # ignore any branch updates -this job would not run if got any branch update, except got the versioning tag above
       - scan:
             requires:
               - build
@@ -107,12 +113,7 @@ workflows:
               branches:
                 only: main
      
-      # - build-and-push:  
-      #     filters:
-      #       tags:
-      #         only: /^v.*/  # triggered only when a tag following the pattern v* (e.g., v1.0.0) is pushed
-      #       branches: 
-      #         ignore: /.*/  # ignore any branch updates -this job would not run if got any branch update, except got the versioning tag above
+      
       # - deploy:
       #     requires:
       #       - build-and-push
