@@ -33,10 +33,9 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
-      - run:
-          name: Docker Login
-          command: |
-            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+      - docker/login:
+          username: DOCKER_USERNAME
+          password: DOCKER_PASSWORD
       - docker/build:
           image: ttanttanyj/6m-software-m4-node-app-for-devops
       - docker/push:
