@@ -3,7 +3,8 @@ version: 2.1
 orbs:
   node: circleci/node@5.0.1
   docker: circleci/docker@2.1.4
-  heroku: circleci/heroku@2.0
+  # heroku: circleci/heroku@2.0
+  snyk: snyk/snyk@1.5.0
 
 jobs:
   build:
@@ -26,33 +27,58 @@ jobs:
       - run: |
           echo "Running tests..."
           npm run test
-  build-and-push:
+  # build-and-push:
+  #   docker:
+  #     - image: cimg/node:16.10
+  #   steps:
+  #     - setup_remote_docker
+  #     - checkout
+  #     - run:
+  #         name: Docker Login
+  #         command: |
+  #           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+  #     - docker/build:
+  #         image: ttanttanyj/6m-software-m4-node-app-for-devops
+  #     - docker/push:
+  #         image: ttanttanyj/6m-software-m4-node-app-for-devops
+  # deploy:
+  #   executor: heroku/default
+  #   steps:
+  #   - setup_remote_docker      
+  #   - heroku/install
+  #   - checkout
+  #   - run:
+  #       name: Heroku Container Push
+  #       command: | 
+  #           heroku container:login
+  #           heroku stack:set container -a ttanttanyj-su-devops
+  #           heroku container:push web -a ttanttanyj-su-devops
+  #           heroku container:release web -a ttanttanyj-su-devops
+  scan:
     docker:
       - image: cimg/node:16.10
+    environment:
+      IMAGE_NAME: ttanttanyj/node-test
     steps:
-      - setup_remote_docker
       - checkout
-      - run:
-          name: Docker Login
-          command: |
-            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-      - docker/build:
-          image: ttanttanyj/6m-software-m4-node-app-for-devops
-      - docker/push:
-          image: ttanttanyj/6m-software-m4-node-app-for-devops
-  deploy:
-    executor: heroku/default
+      - setup_remote_docker
+      - docker/check
+      - run: docker build -t $IMAGE_NAME .
+      - snyk/scan:
+          docker-image-name: $IMAGE_NAME
+  codescan:
+    docker:
+      - image: cimg/node:16.10
+    environment:
+      IMAGE_NAME: ttanyjttanyj/node-test
     steps:
-    - setup_remote_docker      
-    - heroku/install
-    - checkout
-    - run:
-        name: Heroku Container Push
-        command: | 
-            heroku container:login
-            heroku stack:set container -a ttanttanyj-su-devops
-            heroku container:push web -a ttanttanyj-su-devops
-            heroku container:release web -a ttanttanyj-su-devops
+      - checkout
+      - setup_remote_docker
+      - docker/check
+      - run: docker build -t $IMAGE_NAME .
+      - snyk/install
+      - run: |
+          snyk code test
 
 #for project that use semantic versioning
 workflows:
@@ -67,21 +93,34 @@ workflows:
             - build 
           filters:
             branches:
-              only: main     
-      - build-and-push:  
-          filters:
-            tags:
-              only: /^v.*/  # triggered only when a tag following the pattern v* (e.g., v1.0.0) is pushed
-            branches: 
-              ignore: /.*/  # ignore any branch updates -this job would not run if got any branch update, except got the versioning tag above
-      - deploy:
-          requires:
-            - build-and-push
-          filters:
-            tags:
-              only: /^v.*/
-            branches: 
-              ignore: /.*/
+              only: main
+      - scan:
+            requires:
+              - build
+            filters:
+              branches:
+                only: main
+      - codescan:
+            requires:
+              - build
+            filters:
+              branches:
+                only: main
+     
+      # - build-and-push:  
+      #     filters:
+      #       tags:
+      #         only: /^v.*/  # triggered only when a tag following the pattern v* (e.g., v1.0.0) is pushed
+      #       branches: 
+      #         ignore: /.*/  # ignore any branch updates -this job would not run if got any branch update, except got the versioning tag above
+      # - deploy:
+      #     requires:
+      #       - build-and-push
+      #     filters:
+      #       tags:
+      #         only: /^v.*/
+      #       branches: 
+      #         ignore: /.*/
 
 # branch-based method - for simplier project that is branch-centric
 # workflows:
